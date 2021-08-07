@@ -1,13 +1,3 @@
-# Elijah Thomas
-# 3/31/2021
-# Treehouse Python Techdegree Project 4
-# Store Inventory Database
-
-"""
-I'm going for exceeds expectations on this one. I feel I've even exceeded the exceeds expectations requirements
-in a few subtle ways, such as asking the user if they want to overwrite a file before doing it, or including
-an option to quit the program.
-"""
 
 import csv
 import datetime
@@ -17,8 +7,8 @@ from peewee import *
 db = SqliteDatabase("inventory.db")
 
 class Product(Model):
-    """The database model I'll be using for this project"""
     
+    # The database model used for this project    
     product_id = PrimaryKeyField()
     product_name = TextField(unique = True)
     product_quantity = IntegerField()
@@ -29,21 +19,21 @@ class Product(Model):
         database = db
 
 def make_datetime(string):
-    """Formats a string in mm/dd/yyyy format into a datetime"""
     
+    # Formats a string in mm/dd/yyyy format into a datetime   
     return datetime.datetime.strptime(string, "%m/%d/%Y")
 
 def dollars_to_cents(string):
-    """Simply removes any non-numeric characters (like $ and .) so as to return the number of cents."""
-
+    
+    # Removes any non-numeric characters (like "$" and ".") for the purpose of returning the number of cents.
     if len(string) > 2:
         return "".join([char for char in string if char.isnumeric()])
     else:
         raise ValueError
 
 def cents_to_dollars(string):
-    """Converts any number of cents into dollars"""
-
+    
+    #Converts any number of cents into dollars
     if len(string) < 3:
         zfilled = string.zfill(3)
         return f"${zfilled[0]}.{zfilled[1:]}"
@@ -51,7 +41,8 @@ def cents_to_dollars(string):
         return f"${string[:-2]}.{string[-2:]}"
 
 def overwrite_prompt(Id):
-    """Asks the user if they want to overwrite the existing record at the given ID."""
+    
+    # Asks the user if they want to overwrite the existing record at the given ID.
     if input(f"\nRecord already exists. Overwrite existing record? (ID: {Id}) (Y/N) ").lower().strip() != "n":
         return True
     else:
@@ -59,13 +50,12 @@ def overwrite_prompt(Id):
     
 
 def add_or_update(name, quant, price, date, alert = False):
-    """
-    Adds the given data to the database, or, if the name is already taken (which is the only way to raise an
-    integrity error in this case) overwrite the entry that took that name with new, user-defined data.
 
-    The alert boolean is only set to true if we want to alert the user that they're overwriting en existing
-    record. Alerts are disabled when this function is used to upload data from the CSV file.
-    """
+    # Adds the given data to the database, or, if the name is already taken (which is the only way to raise an
+    # integrity error in this case) overwrite the entry that took that name with new, user-defined data.
+    # The alert boolean is only set to true if we want to alert the user that they're overwriting en existing
+    # record. Alerts are disabled when this function is used to upload data from the CSV file.
+    
     try:
         Product.create(
             product_name = name,
@@ -91,12 +81,10 @@ def add_or_update(name, quant, price, date, alert = False):
                     print("Record overwritten.")
 
 def read_csv(filepath):
-    """
-    Function to read the CSV into my database.
 
-    If this raises an integrity error, we assume it's because multiple entries created at different times exist for
-    the same product. If so, the newer data overwrites the old, as shown by the datetime comparison in the error
-    """
+    # Function to read the CSV into my database.
+    # If this raises an integrity error, we assume it's because multiple entries created at different times exist for
+    # the same product. If so, the newer data overwrites the old, as shown by the datetime comparison in the error
     
     with open(filepath) as file:
         reader = csv.reader(file)
@@ -105,19 +93,13 @@ def read_csv(filepath):
             add_or_update(row[0], row[2], dollars_to_cents(row[1]), make_datetime(row[3]))
 
 def get_by_id(ID):
-    """
-    V OPTION
-
-    Prints out information on a given product after the user enters said product's unique product ID.
-
-    Index and value errors are handled.
     
-    FIXED:
-    
-    I got "Needs Work" for sending the user all the way back to the main menu if their input was invalid.
-    The function will now return True or None as an indicator of the input's validity, which will determine
-    if the V-option's new loop needs to re-run or not.
-    """
+    # V OPTION:
+
+    # Prints out information on a given product after the user enters said product's unique product ID.
+    # Index and value errors are handled.   
+    # The function returns True or None as an indicator of the input's validity, which will determine
+    # if the V-option's new loop needs to re-run or not.
     
     try:
         true_ID = abs(int(ID))
@@ -134,15 +116,13 @@ def get_by_id(ID):
         print("\nPlease type a whole number.")
 
 def add_record():
-    """
-    A OPTION
 
-    Lets the user add a record to the database. If the name the user chose for the record conflicts with existing
-    data, the newer of the two will replace the older. If an integrity error occurs for any other reason, such
-    as the user entering a null value, their input will be disregarded.
+    # A OPTION:
 
-    Float rather than int is used for product quantity, in case the product is being sold by pounds, ounces, etc.
-    """
+    # Lets the user add a record to the database. If the name the user chose for the record conflicts with existing
+    # data, the newer of the two will replace the older. If an integrity error occurs for any other reason, such
+    # as the user entering a null value, their input will be disregarded.
+    # Float rather than int is used for product quantity, in case the product is being sold by pounds, ounces, etc.
 
     try:
         name = input("\nWhat is the name of the product?\t\t").title()
@@ -160,11 +140,9 @@ def add_record():
         print("\nInvalid entry. Ensure the name isn't empty, the quantity is a number, and the price is in cents (type $1.23 as 123)")
 
 def backup():
-    """
-    B OPTION
 
-    Backs up the existing database to a new CSV.
-    """
+    # B OPTION:
+    # Backs up the existing database to a new CSV.
 
     with open("backup.csv", "w+", newline = '') as file:
         writer = csv.writer(file)
@@ -183,7 +161,6 @@ if __name__ == "__main__":
         if option == "v":
 
             # New loop to continue asking for user's input until it becomes usable by the program
-            
             while not get_by_id(input("\nProduct ID number: ")):
                 pass
         elif option == "a":
@@ -196,6 +173,8 @@ if __name__ == "__main__":
     # Q OPTION
     
     print("\nThank you for using the database program! Have a nice day!")
-    from time import sleep # Since time.sleep is only used in this very specific instance at the end of my code, I chose to import it here for its first and only use.
+    
+    # Since time.sleep is only used in this very specific instance at the end of my code, I chose to import it here for its first and only use.
+    from time import sleep 
     sleep(3)
     quit()
